@@ -36,6 +36,13 @@ export class CustomerController {
     return this.customerService.findOne(id, user);
   }
 
+  @MessagePattern('customer.code')
+  findOneByCode(@Payload() payload: { code: number; user: User }) {
+    const { code, user } = payload;
+
+    return this.customerService.findOneByCode(code, user);
+  }
+
   @MessagePattern('customer.update')
   update(@Payload() payload: { updateCustomerDto: UpdateCustomerDto; user: User }) {
     const { updateCustomerDto, user } = payload;

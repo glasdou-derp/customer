@@ -56,9 +56,22 @@ export class CustomerService {
   }
 
   async findOne(id: string, user: User): Promise<CustomerResponse> {
-    this.logger.log(`Find one customer: ${id}, user: ${JSON.stringify(user)}`);
+    this.logger.log(`Find customer: ${id}, user: ${JSON.stringify(user)}`);
     const isAdmin = hasRoles(user.roles, [Role.Admin]);
     const where = isAdmin ? { id } : { id, deletedAt: null };
+    const data = await this.customer.findUnique({ where });
+
+    if (!data) throw new RpcException({ status: HttpStatus.NOT_FOUND, message: '[ERROR] Customer not found' });
+
+    const [computedData] = await this.getUsers([data], user);
+
+    return computedData;
+  }
+
+  async findOneByCode(code: number, user: User): Promise<CustomerResponse> {
+    this.logger.log(`Find customer by code: ${code}, user: ${JSON.stringify(user)}`);
+    const isAdmin = hasRoles(user.roles, [Role.Admin]);
+    const where = isAdmin ? { code } : { code, deletedAt: null };
     const data = await this.customer.findUnique({ where });
 
     if (!data) throw new RpcException({ status: HttpStatus.NOT_FOUND, message: '[ERROR] Customer not found' });
